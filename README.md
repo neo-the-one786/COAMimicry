@@ -1,5 +1,4 @@
-# C Program: COA Mimicking MyProcessor.c
-
+# C Program: COA Mimicking C Program
 ## Description
 This repository contains a simple C program named "MyProcessor.c" that attempts to mimic the workings of computer organisation and architecture of Intel 8085 processor
 

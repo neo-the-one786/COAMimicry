@@ -80,8 +80,8 @@ Please replace these placeholder contents with actual data and program instructi
 #### Sample I/O:
 
 ```plaintext
-Enter data file name: data_input.txt
-Enter program file name: program_input.txt
+Enter data file name: data.txt
+Enter program file name: program.txt
 
 Instruction: <type> <opcode> <addrMode> <operand1> <operand2> <operand3>
 ...

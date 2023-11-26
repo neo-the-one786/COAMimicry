@@ -63,7 +63,7 @@ Please replace these placeholder contents with actual data and program instructi
 
 2. **Execute the Program:**
    ```bash
-   ./virtual_machine
+   ./a.exe
    ```
 
 #### Sample Input/Output:

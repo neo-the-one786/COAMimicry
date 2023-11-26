@@ -98,7 +98,7 @@ Replace `<type>`, `<opcode>`, `<addrMode>`, `<operand1>`, `<operand2>`, `<operan
 
 #### Notes:
 
-- Ensure the input files (`data_input.txt` and `program_input.txt`) are properly formatted and accessible.
+- Ensure the input files (`data.txt` and `program.txt`) are properly formatted and accessible.
 - The simulated instruction set may have limitations compared to real architectures.
 
 Feel free to adapt this README with more specific information or update it according to the actual functionality and expected input/output of your virtual machine.   

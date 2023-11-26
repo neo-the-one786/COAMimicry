@@ -58,7 +58,7 @@ Please replace these placeholder contents with actual data and program instructi
 
 1. **Compile the Code:**
    ```bash
-   gcc -o virtual_machine virtual_machine.c
+   gcc MyProcessor.c
    ```
 
 2. **Execute the Program:**
@@ -69,8 +69,8 @@ Please replace these placeholder contents with actual data and program instructi
 #### Sample Input/Output:
 
 - **Input:**
-  - Enter data file name: `data_input.txt`
-  - Enter program file name: `program_input.txt`
+  - Enter data file name: `data.txt`
+  - Enter program file name: `program.txt`
 
 - **Sample Output:**
   - Displays the fetched instructions and their execution.

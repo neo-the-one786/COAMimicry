@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 typedef enum Opcode {
     ADD, SUB, AND, OR, XOR, LOAD, STORE
@@ -19,11 +20,28 @@ typedef enum InstructionType {
 } InstructionType;
 
 typedef enum AddrMode {
-    IMM, REG
+    REG, IMM
 } AddrMode;
 
-#define MEMO_SIZE 1024
-int memo[MEMO_SIZE] = {0};
+#define WORD_LENGTH 17
+#define NUM_BLOCKS 16
+
+char memo[NUM_BLOCKS][WORD_LENGTH] = {{"0000000000000000"},
+                                      {"0000000000000000"},
+                                      {"0000000000000000"},
+                                      {"0000000000000000"},
+                                      {"0000000000000000"},
+                                      {"0000000000000000"},
+                                      {"0000000000000000"},
+                                      {"0000000000000000"},
+                                      {"0000000000000000"},
+                                      {"0000000000000000"},
+                                      {"0000000000000000"},
+                                      {"0000000000000000"},
+                                      {"0000000000000000"},
+                                      {"0000000000000000"},
+                                      {"0000000000000000"},
+                                      {"0000000000000000"}};
 
 int pc = 0;
 
@@ -39,10 +57,14 @@ void loadData(char fileName[]) {
         perror("Error opening data file");
         exit(EXIT_FAILURE);
     }
+    int i = R0;
+    char addr[17], data[17];
+    addr[16] = '\0';
+    data[16] = '\0';
     while (!feof(dataFile)) {
-        char addr[16], data[16];
         fscanf(dataFile, "%s %s", addr, data);
-        memo[binToDec(addr)] = binToDec(data);
+        strcpy(memo[binToDec(addr)], data);
+        reg[i++] = binToDec(data);
     }
     fclose(dataFile);
 }
@@ -53,105 +75,126 @@ void loadProg(char fileName[]) {
         perror("Error opening program file");
         exit(EXIT_FAILURE);
     }
-    char instruct[16];
+    char instruct[WORD_LENGTH];
+    instruct[WORD_LENGTH - 1] = '\0';
+    int i = 0;
     while (!feof(progFile)) {
         fscanf(progFile, "%s", instruct);
-        memo[pc++] = binToDec(instruct);
+        strcpy(memo[i], instruct);
+        i++;
     }
     fclose(progFile);
 }
 
 
-void instructionDecode(Instruction instruction) {
-    instruction.type = memo[pc];
-    instruction.opcode = memo[pc + 1];
-    instruction.addrMode = memo[pc + 2];
-    instruction.operand1 = memo[pc + 3];
-    instruction.operand1 = memo[pc + 4];
-    instruction.operand1 = memo[pc + 5];
+void instructionDecode(Instruction *instruction) {
+    char instruct[WORD_LENGTH];
+    instruct[WORD_LENGTH - 1] = '\0';
+    strcpy(instruct, memo[pc]);
+    char type[2], opcode[5], addrMode[2], operand1[4], operand2[5], operand3[4];
+    strncpy(type, instruct + 0, 1);
+    type[1] = '\0';
+    strncpy(opcode, instruct + 1, 4);
+    opcode[4] = '\0';
+    strncpy(addrMode, instruct + 5, 1);
+    addrMode[1] = '\0';
+    strncpy(operand1, instruct + 6, 3);
+    operand1[3] = '\0';
+    strncpy(operand2, instruct + 9, 4);
+    operand2[4] = '\0';
+    strncpy(operand3, instruct + 13, 3);
+    operand3[3] = '\0';
+    (*instruction).type = binToDec(type);
+    (*instruction).opcode = binToDec(opcode);
+    (*instruction).addrMode = binToDec(addrMode);
+    (*instruction).operand1 = binToDec(operand1);
+    (*instruction).operand2 = binToDec(operand2);
+    (*instruction).operand3 = binToDec(operand3);
 }
 
 Instruction instructionFetch() {
-    Instruction instruction;
-    instruction.type = instruction.opcode = instruction.addrMode = instruction.operand1 = instruction.operand2 = instruction.operand3 = 0;
-    instructionDecode(instruction);
-    switch (memo[pc]) {
-        case ARITHMETIC_LOGICAL:
-            pc += 6;
-            break;
-        case DATA_TRANSFER:
-            pc += 5;
-            break;
+    Instruction instruct;
+    instruct.type = instruct.opcode = instruct.addrMode = instruct.operand1 = instruct.operand2 = instruct.operand3 = 0;
+    if (pc < NUM_BLOCKS) {
+        instructionDecode(&instruct);
+        pc++;
+    } else {
+        instruct.type = -1;
     }
-    return instruction;
+    return instruct;
 }
 
 void performALUOps(Instruction instruction) {
     switch (instruction.addrMode) {
-        case IMM:
-            switch (instruction.opcode) {
-                case ADD:
-                    instruction.operand1 = instruction.operand2 + reg[instruction.operand3];
-                    break;
-                case SUB:
-                    instruction.operand1 = instruction.operand2 - reg[instruction.operand3];
-                    break;
-                case AND:
-                    instruction.operand1 = instruction.operand2 & reg[instruction.operand3];
-                    break;
-                case OR:
-                    instruction.operand1 = instruction.operand2 | reg[instruction.operand3];
-                    break;
-                case XOR:
-                    instruction.operand2 = instruction.operand2 ^ reg[instruction.operand3];
-                    break;
-                default:
-                    return;
-            }
         case REG:
             switch (instruction.opcode) {
                 case ADD:
-                    instruction.operand1 = reg[instruction.operand2] + reg[instruction.operand3];
+                    reg[instruction.operand1] = reg[instruction.operand2] + reg[instruction.operand3];
                     break;
                 case SUB:
-                    instruction.operand1 = reg[instruction.operand2] - reg[instruction.operand3];
+                    reg[instruction.operand1] = reg[instruction.operand2] - reg[instruction.operand3];
                     break;
                 case AND:
-                    instruction.operand1 = reg[instruction.operand2] & reg[instruction.operand3];
+                    reg[instruction.operand1] = reg[instruction.operand2] & reg[instruction.operand3];
                     break;
                 case OR:
-                    instruction.operand1 = reg[instruction.operand2] | reg[instruction.operand3];
+                    reg[instruction.operand1] = reg[instruction.operand2] | reg[instruction.operand3];
                     break;
                 case XOR:
-                    instruction.operand2 = reg[instruction.operand2] ^ reg[instruction.operand3];
+                    reg[instruction.operand2] = reg[instruction.operand2] ^ reg[instruction.operand3];
                     break;
                 default:
                     return;
             }
+            break;
+        case IMM:
+            switch (instruction.opcode) {
+                case ADD:
+                    reg[instruction.operand1] = instruction.operand2 + reg[instruction.operand3];
+                    break;
+                case SUB:
+                    reg[instruction.operand1] = instruction.operand2 - reg[instruction.operand3];
+                    break;
+                case AND:
+                    reg[instruction.operand1] = instruction.operand2 & reg[instruction.operand3];
+                    break;
+                case OR:
+                    reg[instruction.operand1] = instruction.operand2 | reg[instruction.operand3];
+                    break;
+                case XOR:
+                    reg[instruction.operand2] = instruction.operand2 ^ reg[instruction.operand3];
+                    break;
+                default:
+                    return;
+            }
+            break;
         default:
             return;
     }
-
 }
 
 void performMemoOps(Instruction instruction) {
     switch (instruction.addrMode) {
-        case IMM:
-            switch (instruction.opcode) {
-                case LOAD:
-                case STORE:
-                    reg[instruction.operand1] = instruction.operand2;
-                default:
-                    return;
-            }
         case REG:
             switch (instruction.opcode) {
                 case LOAD:
                 case STORE:
                     reg[instruction.operand1] = reg[instruction.operand2];
+                    break;
                 default:
                     return;
             }
+            break;
+        case IMM:
+            switch (instruction.opcode) {
+                case LOAD:
+                case STORE:
+                    reg[instruction.operand1] = instruction.operand2;
+                    break;
+                default:
+                    return;
+            }
+            break;
         default:
             return;
     }
@@ -171,9 +214,16 @@ void instructionExecute(Instruction instruction) {
 }
 
 void displayAllRegisterValues() {
-    printf("Register values:\n");
+    printf("\nRegister values:\n");
     for (int i = R0; i <= R7; i++) {
         printf("R%d: %d\n", i, reg[i]);
+    }
+}
+
+void displayMemory() {
+    printf("\nMemory: ");
+    for (int i = 0; i < 16; i++) {
+        printf("\n%s ", memo[i]);
     }
 }
 
@@ -185,14 +235,19 @@ int main() {
     printf("\nEnter program file name: ");
     scanf("%s", progFile);
     loadProg(progFile);
-    for (int i = 0; i <= 1; i++) {
+    FILE *filePtr = fopen(progFile, "r");
+    while (!feof(filePtr)) {
+        char scanNext[WORD_LENGTH];
+        fscanf(filePtr, "%s", scanNext);
         Instruction instruction = instructionFetch();
-//        if (instruction == 0xFFFFFFFF) {
-//            break;
-//        }
-        instructionDecode(instruction);
+        if (instruction.type == -1) {
+            break;
+        }
+        printf("Instruction: %d %d %d %d %d %d\n", instruction.type, instruction.opcode, instruction.addrMode,
+               instruction.operand1, instruction.operand2, instruction.operand3);
         instructionExecute(instruction);
     }
     displayAllRegisterValues();
+    displayMemory();
     return 0;
 }

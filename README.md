@@ -2,7 +2,7 @@
 
 #### Overview:
 
-This C code simulates a simple virtual machine with a limited instruction set architecture (ISA). The program performs basic arithmetic, logical operations, and data transfer operations using a custom-defined instruction format. It emulates an instruction fetch-decode-execute cycle within a simulated memory space and registers.
+This C code simulates a simple virtual machine with a limited instruction set architecture (ISA). The program performs basic arithmetic, logical, and data transfer operations using a custom-defined instruction format. It emulates an instruction fetch-decode-execute cycle within a simulated memory space and registers.
 
 #### Code Components:
 
